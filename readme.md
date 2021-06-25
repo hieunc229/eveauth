@@ -8,10 +8,11 @@ Included in this guide:
 - [Install eveauth](#install)
 - [Auth wrapper and Middleware](#auth-handle-wrapper-and-middleware)
 - [Register handler](#register-handler)
-- [Login handler (return jwt token)](#login-handler)
+- [Login handler](#login-handler)
+- [Change password handler](#change-password-handler)
 - [How to use JWT token](#how-to-use-jwt-token)
-- [How to verify a request (*http.Request)](#how-to-verify-a-request-contains-a-jwt-token)
-- [How to change password](#how-to-change-password)
+- [How to verify a request](#how-to-verify-a-request-contains-a-jwt-token)
+- [Setup enviroment variables](#setup-enviroment-variables)
 2. [Changelog](#2-changelog)
 3. [Feedback and Contribute](#3-feedback-and-contribute)
 4. [Licenses](#4-licenses)
@@ -133,6 +134,69 @@ Error return:
 }
 ```
 
+
+### Change password handler
+
+Use `eveauth.ChangePasswordhandler` to handle change password request. Note that **the request must be authorized with Bearer token** mention above. _If you don't have a bearer token, login to get a bearer token first_
+
+```go
+router.HandlerFunc("/auth/change-password", eveauth.ChangePasswordhandler)
+```
+
+The body json payload must be:
+```js
+{
+    "data": {
+        "password": "oldPassword",
+        "new_password": "xxxxxxx",
+
+        //// set to `true` to replace the current token with a new one
+        "change_token": false, 
+
+        // set to `true` to remove all existing tokens, then add a new one 
+        // (i.e useful for logout all other devices feature)
+        "clear_tokens": false, 
+    }
+}
+```
+Success response:
+```js
+{
+    "data" {
+        // If `change_token` or `clear_tokens` is true, you will need to use this new token
+        // Otherwise, this value will be an empty string ("")
+        "new_token": "" 
+    },
+    "ok": true
+}
+```
+
+Error response:
+```js
+{
+    "error": "error message",
+    "ok": false
+}
+```
+
+Here is a change password example using fetch in JavaScript
+```js
+fetch("/user_only/items/goodItemId", {
+    method: "POST",
+    headers: {
+        'Authorization': 'Bearer <token>'
+        // 'Content-Type': 'application/json'
+        // ...
+    }
+    body: JSON.stringify({
+        data: {
+            password: "xxxxx",
+            new_password: "xxxxxxxx"
+        }
+    })
+})
+```
+
 ### How to use JWT token
 
 After send a login request and receive a sucess response, you'll be given a `token`. This token is meant to use as [Bearer](https://swagger.io/docs/specification/authentication/bearer-authentication/) token.
@@ -175,67 +239,47 @@ func yourHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-### How to change password
+### Setup enviroment variables
 
-Use `eveauth.ChangePasswordhandler` to handle change password request. Note that **the request must be authorized with Bearer token** mention above. _If you don't have a bearer token, login to get a bearer token first_
+There are a few enviroment variables that you should update when using the product:
+
+- `EVEAUTH_JWT_SECRET` (default `eveauth`): a secret string to create jwt token
+- `EVEAUTH_PATH` (default `auth`): path to your auth database. You can use absolute or relative path. If you use relative path, the path root is where you run the command)
+
+There are 2 ways to set these enviroment variables:
+
+1. Using flags in command (_only used after you build the application (aka binary file)_). For example:
+```sh
+$ ./coolapp -EVEAUTH_JWT_SECRET=randomstringnoonecanguess -EVEAUTH_PATH=/ect/safe-area/coolappAuth.db
+```
+
+2. Use [godotenv](https://github.com/joho/godotenv) (or any dotenv alternative). First, install `godotenv` (`go get https://github.com/joho/godotenv`), then create a `.env` at your root directory with the following content:
+
+```
+# .env
+EVEAUTH_JWT_SECRET=randomstringnoonecanguess
+EVEAUTH_PATH=/ect/safe-area/coolappAuth.db
+```
+
+3. Load the `.env` file. Read the manual from `dotenv` package you use. For example, for `godotenv`:
 
 ```go
-router.HandlerFunc("/auth/change-password", eveauth.ChangePasswordhandler)
-```
+package main
 
-The body json payload must be:
-```js
-{
-    "data": {
-        "password": "oldPassword",
-        "new_password": "xxxxxxx",
+import (
+    ...
+    "github.com/joho/godotenv"
+)
 
-        //// set to `true` to replace the current token with a new one
-        "change_token": false, 
+func main() {
 
-        // set to `true` to remove all existing tokens, then add a new one 
-        // (i.e useful for logout all other devices feature)
-        "clear_tokens": false, 
+    // Load .env file
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatal("Error loading .env file")
     }
-}
-```
 
-Success response:
-```js
-{
-    "data" {
-        // If `change_token` or `clear_tokens` is true, you will need to use this new token
-        // Otherwise, this value will be an empty string ("")
-        "new_token": "" 
-    },
-    "ok": true
 }
-```
-
-Error response:
-```js
-{
-    "error": "error message",
-    "ok": false
-}
-```
-
-Here is a change password example using fetch in JavaScript
-```js
-fetch("/user_only/items/goodItemId", {
-    method: "POST",
-    headers: {
-        'Authorization': 'Bearer <token>'
-        // 'Content-Type': 'application/json'
-        // ...
-    }
-    body: JSON.stringify({
-        data: {
-            password: "xxxxx",
-            new_password: "xxxxxxxx"
-        }
-    })
-})
 ```
 
 ## 2. Changelog
