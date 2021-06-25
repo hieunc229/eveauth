@@ -45,7 +45,7 @@ router.HandlerFunc("/user_only", eveauth.AuthHandler(yourHandler))
 
 When there is an anonymous request to these paths, it return the following:
 
-```json
+```js
 {
     "ok": false,
     "error": "invalid access"
@@ -61,7 +61,7 @@ router.HandlerFunc("/auth/register", eveauth.RegisterHandler)
 ```
 
 The body json data must be:
-```json
+```js
 {
     "data": {
         "username": "xxxxxx",
@@ -71,14 +71,14 @@ The body json data must be:
 ```
 
 Success return:
-```json
+```js
 {
     "ok": true
 }
 ```
 
 Error return:
-```json
+```js
 {
     "error": "error message",
     "ok": false
@@ -94,7 +94,7 @@ router.HandlerFunc("/auth/login", eveauth.LoginHandler)
 ```
 
 The body json data must be:
-```json
+```js
 {
     "data": {
         "username": "xxxxxx",
@@ -104,7 +104,7 @@ The body json data must be:
 ```
 
 Success return:
-```json
+```js
 {
     "data": {
         "token": "jwt token str" // use as bearer token
@@ -114,7 +114,7 @@ Success return:
 ```
 
 Error return:
-```json
+```js
 {
     "error": "error message",
     "ok": false
@@ -170,7 +170,7 @@ router.HandlerFunc("/auth/change-password", eveauth.ChangePasswordhandler)
 ```
 
 The body json payload must be:
-```json
+```js
 {
     "data": {
         "password": "oldPassword",
