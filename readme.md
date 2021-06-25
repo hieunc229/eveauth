@@ -1,4 +1,4 @@
-# eveauth
+# EveAuth
 
 Auth middleware and request handler wrapper for GO. It uses [boltDB](https://github.com/boltdb/bolt) to store user data
 

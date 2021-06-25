@@ -41,10 +41,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		bucket := tx.Bucket(AuthBucketName)
 
 		if bucket == nil {
-			bucket, err = initateAuthBucket(tx)
-			if err != nil {
-				return err
-			}
+			return errors.New("auth has not been initated")
 		}
 
 		existingUser := bucket.Get([]byte(user.Username))
