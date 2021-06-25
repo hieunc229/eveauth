@@ -142,7 +142,7 @@ fetch("/user_only/items/goodItemId", {
 
 ### How to verify a request contains a JWT token
 
-Use `eveauth.VerifyRequest(*http.Request) (*JWTPayload, err)` to verify your http request. This handler will (1) get the bearer token, (2) check if it is valid, (3) return the data contains in the token or error
+Use `eveauth.VerifyRequest(*http.Request) (*JWTPayload, err)` to verify your http request. This handler will (1) get the bearer token, (2) check if it is valid, (3) return error or return the data contains in the token
 
 Here is an example:
 ```go
@@ -163,7 +163,7 @@ func yourHandler(w http.ResponseWriter, r *http.Request) {
 
 ### How to change password
 
-Use `eveauth.ChangePasswordhandler` to handle change password request. Note that the request must be authorized with Bearer token mention above
+Use `eveauth.ChangePasswordhandler` to handle change password request. Note that **the request must be authorized with Bearer token** mention above. _If you don't have a bearer token, login to get a bearer token first_
 
 ```go
 router.HandlerFunc("/auth/change-password", eveauth.ChangePasswordhandler)
@@ -183,6 +183,26 @@ The body json payload must be:
         // (i.e useful for logout all other devices feature)
         "clear_tokens": false, 
     }
+}
+```
+
+Success response:
+```js
+{
+    "data" {
+        // If `change_token` or `clear_tokens` is true, you will need to use this new token
+        // Otherwise, this value will be an empty string ("")
+        "new_token": "" 
+    },
+    "ok": true
+}
+```
+
+Error response:
+```js
+{
+    "error": "error message",
+    "ok": false
 }
 ```
 
