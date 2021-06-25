@@ -13,7 +13,7 @@ type UserPayload struct {
 	// Email string `json:"email"`
 }
 
-func verifyRequestToken(r *http.Request) (*JWTPayload, error) {
+func VerifyRequest(r *http.Request) (*JWTPayload, error) {
 	bearer := r.Header.Get("Authorization")
 	token := getToken(bearer)
 	payload, err := verifyToken(token)

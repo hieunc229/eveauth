@@ -8,7 +8,7 @@ import (
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if _, err := verifyRequestToken(r); err == nil {
+		if _, err := VerifyRequest(r); err == nil {
 			utils.HandleError(w, err)
 			return
 		}
