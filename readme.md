@@ -9,6 +9,7 @@ Included in this guide:
 - [Auth wrapper and Middleware](#auth-handle-wrapper-and-middleware)
 - [Register handler](#register-handler)
 - [Login handler (return jwt token)](#login-handler)
+- [How to use JWT token](#how-to-use-jwt-token)
 - [How to verify a request (*http.Request)](#how-to-verify-a-request-contains-a-jwt-token)
 2. [Feedback and Contribute](#feedback-and-contribute)
 3. [Licenses](#licenses)
