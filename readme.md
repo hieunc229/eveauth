@@ -1,14 +1,15 @@
 # eveauth
 
-Auth middleware and request handler wrapper for GO
+Auth middleware and request handler wrapper for GO. It used [boltDB](https://github.com/boltdb/bolt) to store user data
 
 What's in this guide:
 
-- Install eveauth
-- Auth handle wrapper and middleware
-- Register handler
-- Login handler
-- How to verify a request (*http.Request)
+1. Install eveauth
+2. Auth wrapper and Middleware
+3. Register handler
+4. Login handler (return jwt token)
+5. How to use JWT token
+6. How to verify a request (*http.Request)
 
 
 ### 1. Install
@@ -138,7 +139,7 @@ fetch("/user_only/items/goodItemId", {
 })
 ```
 
-### 5. How to verify a request contains a JWT token
+### 6. How to verify a request contains a JWT token
 
 Use `eveauth.VerifyRequest(*http.Request) (*JWTPayload, err)` to verify your http request. This handler will (1) get the bearer token, (2) check if it is valid, (3) return the data contains in the token or error
 
