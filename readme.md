@@ -55,7 +55,7 @@ When there is an anonymous request to these paths, it return the following:
 }
 ```
 
-### 3. Register handler
+### Register handler
 
 Use `eveauth.Register` handler to handle create account
 
@@ -170,5 +170,5 @@ Always welcome. Please [open a new thread](https://github.com/hieunc229/eveauth/
 
 ## 3. Licenses
 
-eveauth MIT
-BoltDB MIT
+- eveauth MIT
+- BoltDB MIT
