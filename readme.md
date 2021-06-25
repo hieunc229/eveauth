@@ -11,6 +11,7 @@ Included in this guide:
 - [Login handler (return jwt token)](#login-handler)
 - [How to use JWT token](#how-to-use-jwt-token)
 - [How to verify a request (*http.Request)](#how-to-verify-a-request-contains-a-jwt-token)
+- [How to change password](#how-to-change-password)
 2. [Feedback and Contribute](#feedback-and-contribute)
 3. [Licenses](#licenses)
 
@@ -57,10 +58,10 @@ When there is an anonymous request to these paths, it return the following:
 
 ### Register handler
 
-Use `eveauth.Register` handler to handle create account
+Use `eveauth.RegisterHandler` handler to handle create account
 
 ```go
-router.HandlerFunc("/auth/register", eveauth.Register)
+router.HandlerFunc("/auth/register", eveauth.RegisterHandler)
 ```
 
 The body json data must be:
@@ -90,10 +91,10 @@ Error return:
 
 ### Login handler
 
-Use `eveauth.Login` handler to handle login
+Use `eveauth.LoginHandler` handler to handle login
 
 ```go
-router.HandlerFunc("/auth/login", eveauth.Login)
+router.HandlerFunc("/auth/login", eveauth.LoginHandler)
 ```
 
 The body json data must be:
@@ -130,7 +131,7 @@ After send a login request and receive a sucess response, you'll be given a `tok
 
 Whenever you make a request and want it to be authorized, added `Authorization: Bearer <token>` to the request header
 
-Here is an example with [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) in JS
+Here is an example with [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) in JavaScript
 ```js
 fetch("/user_only/items/goodItemId", {
     method: "POST",
@@ -163,6 +164,43 @@ func yourHandler(w http.ResponseWriter, r *http.Request) {
     username = payload.Username
 }
 ```
+
+### How to change password
+
+Use `eveauth.ChangePasswordhandler` to handle change password request. Note that the request must be authorized with Bearer token mention above
+
+```go
+router.HandlerFunc("/auth/change-password", eveauth.ChangePasswordhandler)
+```
+
+The body json payload must be:
+```json
+{
+    "data": {
+        "password": "oldPassword",
+        "new_password": "xxxxxxx"
+    }
+}
+```
+
+Here is an example using fetch in JavaScript
+```js
+fetch("/user_only/items/goodItemId", {
+    method: "POST",
+    headers: {
+        'Authorization': 'Bearer <token>'
+        // 'Content-Type': 'application/json'
+        // ...
+    }
+    body: JSON.stringify({
+        data: {
+            password: "xxxxx",
+            new_password: "xxxxxxxx"
+        }
+    })
+})
+```
+
 
 ## 2. Feedback and Contribute
 
