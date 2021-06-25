@@ -11,6 +11,9 @@ import (
 type userData struct {
 	HashedPassword string `json:"password"`
 	Email          string `json:"email"`
+
+	// Valid tokens
+	Tokens []string `json:"tokens"`
 }
 
 func setUserData(bucket *bolt.Bucket, username string, user userData) error {
@@ -25,14 +28,32 @@ func setUserData(bucket *bolt.Bucket, username string, user userData) error {
 
 func getUserData(bucket *bolt.Bucket, username string) (userData, error) {
 
+	var err error
 	var userData userData
+
+	if bucket == nil {
+		db, err := getDB()
+
+		if err != nil {
+			return userData, err
+		}
+
+		tx, err := db.Begin(false)
+
+		if err != nil {
+			return userData, err
+		}
+
+		bucket = tx.Bucket(AuthBucketName)
+	}
+
 	userDataRawValue := bucket.Get([]byte(username))
 
 	if userDataRawValue == nil {
 		return userData, errors.New("username doesn't exist")
 	}
 
-	err := json.Unmarshal(userDataRawValue, &userData)
+	err = json.Unmarshal(userDataRawValue, &userData)
 
 	return userData, err
 }

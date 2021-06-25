@@ -40,6 +40,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var token string
+
 	err = db.View(func(tx *bolt.Tx) error {
 
 		bucket := tx.Bucket(AuthBucketName)
@@ -49,8 +51,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
-		return checkPasswordHash(userData.HashedPassword, user.Password)
+		if err = checkPasswordHash(userData.HashedPassword, user.Password); err != nil {
+			return err
+		}
 
+		if token, err = createJWTToken(user.Username); err != nil {
+			return err
+		}
+
+		userData.Tokens = append(userData.Tokens, token)
+		return setUserData(bucket, user.Username, userData)
 	})
 
 	defer db.Close()
@@ -59,8 +69,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		handleError(w, errors.New("invalid login"))
 		return
 	}
-
-	token, err := createJWTToken(user.Username)
 
 	if err != nil {
 		handleError(w, err)

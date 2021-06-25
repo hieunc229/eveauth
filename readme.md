@@ -19,13 +19,9 @@ Included in this guide:
 
 ### Install
 
-Install from terminal:
-
 ```ssh
 $ go get github.com/hieunc229/eveauth
 ```
-
-After installed, when using `eveauth`, it usually imports the module automatically. Otherwise, you can add package `github.com/hieunc229/eveauth` to the import command
 
 ### Auth Handle Wrapper and Middleware
 

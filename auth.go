@@ -7,3 +7,4 @@ type UserPayload struct {
 }
 
 var AuthBucketName = []byte("auth")
+var AuthTokenBucketName = []byte("auth_tokens")

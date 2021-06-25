@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"sort"
 
 	"github.com/boltdb/bolt"
 )
@@ -11,6 +12,13 @@ import (
 type changePassword struct {
 	Password    string `json:"password"`
 	NewPassword string `json:"new_password"`
+
+	// Replace current token with a new one
+	ChangeToken bool `json:"change_token"`
+
+	// Remove all existing token, add a new one.
+	// Used for logout of all devices feature
+	ClearToken bool `json:"clear_token"`
 }
 
 type changePasswordPayload struct {
@@ -19,7 +27,7 @@ type changePasswordPayload struct {
 
 func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 
-	jwtPayload, err := VerifyRequest(r)
+	jwtPayload, userData, token, err := VerifyRequest(r)
 
 	if err != nil {
 		handleError(w, err)
@@ -54,14 +62,11 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var newToken string
+
 	err = db.View(func(tx *bolt.Tx) error {
 
 		bucket := tx.Bucket(AuthBucketName)
-		userData, err := getUserData(bucket, username)
-
-		if err != nil {
-			return err
-		}
 
 		if err = checkPasswordHash(userData.HashedPassword, user.Password); err != nil {
 			return err
@@ -70,7 +75,31 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 		newHashedPassword, err := hashPassword(user.NewPassword)
 		if err == nil {
 			userData.HashedPassword = newHashedPassword
-			setUserData(bucket, username, userData)
+
+			if user.ChangeToken {
+
+				tokens := userData.Tokens
+
+				if user.ClearToken {
+					tokens = []string{}
+				} else {
+					tokenIndex := sort.SearchStrings(tokens, token)
+
+					if tokenIndex != -1 {
+						tokens = append(tokens[:tokenIndex], tokens[tokenIndex+1:]...)
+					}
+
+					newToken, err = createJWTToken(username)
+
+					if err != nil {
+						return err
+					}
+				}
+
+				userData.Tokens = append(tokens, newToken)
+			}
+
+			return setUserData(bucket, username, *userData)
 		}
 
 		return err
@@ -83,14 +112,12 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := createJWTToken(username)
-
 	if err != nil {
 		handleError(w, err)
 		return
 	}
 
 	handleData(w, map[string]interface{}{
-		"token": token,
+		"new_token": newToken,
 	})
 }
