@@ -25,20 +25,4 @@ func verifyToken(token string) (*JWTPayload, error) {
 	} else {
 		return nil, ErrExpiredToken
 	}
-
-	// if err != nil {
-	// 	verr, ok := err.(*jwt.ValidationError)
-	// 	if ok && errors.Is(verr.Inner, ErrExpiredToken) {
-	// 		return nil, ErrExpiredToken
-	// 	}
-	// 	return nil, ErrInvalidToken
-	// }
-
-	// payload, ok := jwtToken.Claims.(*JWTPayload)
-	// if !ok {
-	// 	return nil, ErrInvalidToken
-	// }
-
-	// return payload, nil
-
 }

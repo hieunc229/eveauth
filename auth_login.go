@@ -4,25 +4,24 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"summer/modules/utils"
 
 	"github.com/boltdb/bolt"
 )
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user UserPayload
 	json.NewDecoder(r.Body).Decode(&user)
 
 	if user.Password == "" || user.Username == "" {
-		utils.HandleError(w, errors.New("data can not empty"))
+		handleError(w, errors.New("data can not empty"))
 		return
 	}
 
-	db, err := GetDB()
+	db, err := getDB()
 
 	if err != nil {
-		utils.HandleError(w, errors.New("can't load data"))
+		handleError(w, errors.New("can't load data"))
 		return
 	}
 
@@ -43,18 +42,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	if err != nil {
-		utils.HandleError(w, errors.New("invalid login"))
+		handleError(w, errors.New("invalid login"))
 		return
 	}
 
 	token, err := createJWTToken(user.Username)
 
 	if err != nil {
-		utils.HandleError(w, err)
+		handleError(w, err)
 		return
 	}
 
-	utils.HandleData(w, map[string]interface{}{
+	handleData(w, map[string]interface{}{
 		"token": token,
 	})
 }
