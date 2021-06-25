@@ -73,15 +73,8 @@ func getToken(authStr string) string {
 func validateUserInput(user *UserPayload) error {
 
 	var err error
-	errStr := ""
 
-	if user.Username == "" || len(user.Username) < 4 {
-		errStr += "username, "
-	}
-
-	if user.Password == "" || validatePassword(user.Password) != nil {
-		errStr += "password, "
-	}
+	errStr, err := validateUserNamePassword(user.Username, user.Password)
 
 	if _, err = email.ParseAddress(user.Email); err != nil {
 		errStr += "email, "
@@ -92,4 +85,24 @@ func validateUserInput(user *UserPayload) error {
 	}
 
 	return err
+}
+
+func validateUserNamePassword(username string, password string) (string, error) {
+
+	var err error
+	errStr := ""
+
+	if username == "" || len(username) < 4 {
+		errStr += "username, "
+	}
+
+	if password == "" || validatePassword(password) != nil {
+		errStr += "password, "
+	}
+
+	if errStr != "" {
+		err = errors.New("invalid " + errStr)
+	}
+
+	return errStr, err
 }

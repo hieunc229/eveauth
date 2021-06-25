@@ -28,8 +28,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	user := payload.Data
 
-	if user.Password == "" || user.Username == "" {
-		handleError(w, errors.New("data can not empty"))
+	if _, err = validateUserNamePassword(user.Password, user.Username); err != nil {
+		handleError(w, err)
 		return
 	}
 
