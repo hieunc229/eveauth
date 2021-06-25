@@ -8,13 +8,28 @@ import (
 	"github.com/boltdb/bolt"
 )
 
+type loginPayload struct {
+	Data UserPayload `json:"data"`
+}
+
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	var user UserPayload
-	json.NewDecoder(r.Body).Decode(&user)
+	var payload loginPayload
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		handleError(w, errors.New("can't load data"))
+		return
+	}
+
+	user := payload.Data
 
 	if user.Password == "" || user.Username == "" {
 		handleError(w, errors.New("data can not empty"))
+		return
+	}
+
+	if err = validatePassword(user.Password); err != nil {
+		handleError(w, err)
 		return
 	}
 
@@ -29,13 +44,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		bucket := tx.Bucket(AuthBucketName)
 
-		rawValue := bucket.Get([]byte(user.Username))
-
-		if rawValue == nil {
-			return errors.New("username doesn't exist")
+		userData, err := getUserData(bucket, user.Username)
+		if err != nil {
+			return err
 		}
 
-		return checkPasswordHash(string(rawValue), user.Password)
+		return checkPasswordHash(userData.HashedPassword, user.Password)
 
 	})
 

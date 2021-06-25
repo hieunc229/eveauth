@@ -8,14 +8,23 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-var AuthBucketName = []byte("auth")
+type registerPayload struct {
+	Data UserPayload `json:"data"`
+}
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
-	var user UserPayload
-	json.NewDecoder(r.Body).Decode(&user)
+	var payload registerPayload
+	err := json.NewDecoder(r.Body).Decode(&payload)
 
-	if user.Password == "" || user.Username == "" {
+	if err != nil {
+		handleError(w, errors.New("can't load data"))
+		return
+	}
+
+	user := payload.Data
+
+	if user.Password == "" || user.Username == "" || user.Email == "" {
 		handleError(w, errors.New("data can not empty"))
 		return
 	}
@@ -50,7 +59,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
-		return bucket.Put([]byte(user.Username), []byte(password))
+		return setUserData(bucket, user.Username, userData{
+			HashedPassword: password,
+			Email:          user.Email,
+		})
 	})
 
 	defer db.Close()
