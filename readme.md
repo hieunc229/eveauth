@@ -174,7 +174,14 @@ The body json payload must be:
 {
     "data": {
         "password": "oldPassword",
-        "new_password": "xxxxxxx"
+        "new_password": "xxxxxxx",
+
+        //// set to `true` to replace the current token with a new one
+        "change_token": false, 
+
+        // set to `true` to remove all existing tokens, then add a new one 
+        // (i.e useful for logout all other devices feature)
+        "clear_tokens": false, 
     }
 }
 ```

@@ -18,7 +18,7 @@ type changePassword struct {
 
 	// Remove all existing token, add a new one.
 	// Used for logout of all devices feature
-	ClearToken bool `json:"clear_token"`
+	ClearTokens bool `json:"clear_tokens"`
 }
 
 type changePasswordPayload struct {
@@ -80,7 +80,7 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 				tokens := userData.Tokens
 
-				if user.ClearToken {
+				if user.ClearTokens {
 					tokens = []string{}
 				} else {
 					tokenIndex := sort.SearchStrings(tokens, token)
