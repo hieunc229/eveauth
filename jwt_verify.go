@@ -11,7 +11,7 @@ func verifyToken(token string) (*JWTPayload, error) {
 		if !ok {
 			return nil, ErrInvalidToken
 		}
-		return SECRET_JWT, nil
+		return []byte(JWT_SECRET), nil
 	}
 
 	jwtToken, err := jwt.ParseWithClaims(token, &JWTPayload{}, keyFunc)

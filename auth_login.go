@@ -8,8 +8,13 @@ import (
 	"github.com/boltdb/bolt"
 )
 
+type loginData struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type loginPayload struct {
-	Data UserPayload `json:"data"`
+	Data loginData `json:"data"`
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {

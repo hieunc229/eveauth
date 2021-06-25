@@ -28,6 +28,12 @@ func VerifyRequest(r *http.Request, options *AuthHandlerOptions) (*JWTPayload, *
 	var userData userData
 	bearer := r.Header.Get("Authorization")
 	token := getToken(bearer)
+
+	// Request allow anonymous access
+	if options == nil || options.Role != "" || UserRoleLevels[options.Role] == UserRoleLevels[RoleAnonymous] {
+		return nil, nil, token, nil
+	}
+
 	payload, err := verifyToken(token)
 
 	if err != nil {
@@ -44,17 +50,14 @@ func VerifyRequest(r *http.Request, options *AuthHandlerOptions) (*JWTPayload, *
 		return nil, nil, token, errors.New("invalid token")
 	}
 
-	if options != nil && options.Role != "" {
-
-		if options.RoleExact {
-			if UserRoleLevels[userData.Role] != UserRoleLevels[options.Role] {
-				return nil, nil, token, errors.New("unauthorized access")
-			}
-		}
-
-		if UserRoleLevels[userData.Role] < UserRoleLevels[options.Role] {
+	if options.RoleExact {
+		if UserRoleLevels[userData.Role] != UserRoleLevels[options.Role] {
 			return nil, nil, token, errors.New("unauthorized access")
 		}
+	}
+
+	if UserRoleLevels[userData.Role] < UserRoleLevels[options.Role] {
+		return nil, nil, token, errors.New("unauthorized access")
 	}
 
 	context.Set(r, "payload", payload)
@@ -72,11 +75,11 @@ func validateUserInput(user *UserPayload) error {
 	var err error
 	errStr := ""
 
-	if len(user.Username) < 6 {
+	if user.Username == "" || len(user.Username) < 4 {
 		errStr += "username, "
 	}
 
-	if err = validatePassword(user.Password); err != nil {
+	if user.Password == "" || validatePassword(user.Password) != nil {
 		errStr += "password, "
 	}
 
@@ -85,7 +88,7 @@ func validateUserInput(user *UserPayload) error {
 	}
 
 	if errStr != "" {
-		err = errors.New("invalid" + errStr)
+		err = errors.New("invalid " + errStr)
 	}
 
 	return err

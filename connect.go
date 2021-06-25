@@ -5,5 +5,5 @@ import (
 )
 
 func getDB() (*bolt.DB, error) {
-	return bolt.Open("store/auth", 0666, nil)
+	return bolt.Open(AUTH_PATH, 0666, nil)
 }

@@ -1,6 +1,9 @@
 package eveauth
 
-import "github.com/boltdb/bolt"
+import (
+	"flag"
+	"os"
+)
 
 type UserPayload struct {
 	Username string `json:"username"`
@@ -16,19 +19,28 @@ var (
 	RoleMember    = "member"
 	RoleAdmin     = "admin"
 )
+
+var (
+	JWT_SECRET string
+	AUTH_PATH  string
+)
 var UserRoleLevels = map[string]int{
 	RoleAnonymous: 0,
 	RoleMember:    1,
-	RoleMember:    2,
+	RoleAdmin:     2,
 }
 
-func initateAuthBucket(tx *bolt.Tx) (*bolt.Bucket, error) {
+func init() {
 
-	bucket, err := tx.CreateBucket(AuthBucketName)
+	JWT_SECRET = *flag.String("EVEAUTH_JWT_SECRET", "eveauth", "string")
+	AUTH_PATH = *flag.String("EVEAUTH_PATH", "auth", "string")
+	flag.Parse()
 
-	if err != nil {
-		return nil, err
+	if os.Getenv("EVEAUTH_JWT_SECRET") != "" {
+		JWT_SECRET = os.Getenv("EVEAUTH_JWT_SECRET")
 	}
 
-	return bucket, err
+	if os.Getenv("EVEAUTH_AUTH_PATH") != "" {
+		AUTH_PATH = os.Getenv("EVEAUTH_AUTH_PATH")
+	}
 }

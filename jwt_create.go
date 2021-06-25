@@ -17,7 +17,7 @@ func createJWTToken(username string) (string, error) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-	return jwtToken.SignedString(SECRET_JWT)
+	return jwtToken.SignedString([]byte(JWT_SECRET))
 }
 
 func newPayload(username string) (*JWTPayload, error) {

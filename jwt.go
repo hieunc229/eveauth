@@ -2,7 +2,6 @@ package eveauth
 
 import (
 	"errors"
-	"os"
 	"time"
 )
 
@@ -14,7 +13,6 @@ type JWTPayload struct {
 }
 
 var (
-	SECRET_JWT      = []byte(os.Getenv("SECRET_JWT"))
 	ErrInvalidToken = errors.New("unauthorized access (invalid token)")
 	ErrExpiredToken = errors.New("unauthorized access (expired token)")
 )
