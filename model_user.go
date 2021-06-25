@@ -11,6 +11,7 @@ import (
 type userData struct {
 	HashedPassword string `json:"password"`
 	Email          string `json:"email"`
+	Role           string `json:"role"`
 
 	// Valid tokens
 	Tokens []string `json:"tokens"`

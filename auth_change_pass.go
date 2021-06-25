@@ -27,7 +27,7 @@ type changePasswordPayload struct {
 
 func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 
-	jwtPayload, userData, token, err := VerifyRequest(r)
+	jwtPayload, userData, token, err := VerifyRequest(r, &AuthHandlerOptions{Role: "member"})
 
 	if err != nil {
 		handleError(w, err)

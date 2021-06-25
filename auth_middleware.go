@@ -4,14 +4,17 @@ import (
 	"net/http"
 )
 
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func AuthMiddleware(options *AuthHandlerOptions) func(http.Handler) http.Handler {
 
-		if _, _, _, err := VerifyRequest(r); err == nil {
-			handleError(w, err)
-			return
-		}
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		next.ServeHTTP(w, r)
-	})
+			if _, _, _, err := VerifyRequest(r, options); err == nil {
+				handleError(w, err)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }

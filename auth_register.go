@@ -24,8 +24,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	user := payload.Data
 
-	if user.Password == "" || user.Username == "" || user.Email == "" {
-		handleError(w, errors.New("data can not empty"))
+	if err = validateUserInput(&user); err != nil {
+		handleError(w, err)
 		return
 	}
 
@@ -41,7 +41,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		bucket := tx.Bucket(AuthBucketName)
 
 		if bucket == nil {
-			bucket, err = tx.CreateBucket(AuthBucketName)
+			bucket, err = initateAuthBucket(tx)
 			if err != nil {
 				return err
 			}
@@ -50,7 +50,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		existingUser := bucket.Get([]byte(user.Username))
 
 		if existingUser != nil {
-			return errors.New("invalid usersname")
+			return errors.New("invalid username")
 		}
 
 		password, err := hashPassword(user.Password)
@@ -62,6 +62,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return setUserData(bucket, user.Username, userData{
 			HashedPassword: password,
 			Email:          user.Email,
+			Role:           "member",
 		})
 	})
 

@@ -42,7 +42,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var token string
 
-	err = db.View(func(tx *bolt.Tx) error {
+	err = db.Update(func(tx *bolt.Tx) error {
 
 		bucket := tx.Bucket(AuthBucketName)
 
@@ -66,7 +66,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	if err != nil {
-		handleError(w, errors.New("invalid login"))
+		handleError(w, err)
 		return
 	}
 

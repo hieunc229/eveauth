@@ -12,8 +12,9 @@ Included in this guide:
 - [How to use JWT token](#how-to-use-jwt-token)
 - [How to verify a request (*http.Request)](#how-to-verify-a-request-contains-a-jwt-token)
 - [How to change password](#how-to-change-password)
-2. [Feedback and Contribute](#feedback-and-contribute)
-3. [Licenses](#licenses)
+2. [Changelog](#2-changelog)
+3. [Feedback and Contribute](#3-feedback-and-contribute)
+4. [Licenses](#4-licenses)
 
 ## 1. Getting started
 
@@ -36,11 +37,22 @@ import (
 // ie. func (http.ResponseWriter, r *http.Request)
 router := mux.NewRouter()
 
+// auth options
+authOptions := eveauth.AuthHandlerOptions{
+    // allow only member
+    // other values can be eveauth.RoleAdmin, eveauth.RoleAnonymous
+    Role: eveauth.RoleMember,
+
+	// Set to true to forbid access from users with different RoleLevel.
+	// Or set to false (or nil) to forbid only users with lower RoleLevel
+    RoleExact: true
+}
+
 // Use as middleware
-router.Use("/auth", eveauth.AuthMiddleware)
+router.Use("/user_only", eveauth.AuthMiddleware(&authOptions))
 
 // Or wrap around a handler
-router.HandlerFunc("/user_only", eveauth.AuthHandler(yourHandler))
+router.HandlerFunc("/user_only", eveauth.AuthHandler(yourHandler, &authOptions))
 ```
 
 When there is an anonymous request to these paths, it return the following:
@@ -54,7 +66,7 @@ When there is an anonymous request to these paths, it return the following:
 
 ### Register handler
 
-Use `eveauth.RegisterHandler` handler to handle create account
+Use `eveauth.RegisterHandler` handler to handle create account. Registed users will have `eveauth.RoleMember` role
 
 ```go
 router.HandlerFunc("/auth/register", eveauth.RegisterHandler)
@@ -142,13 +154,15 @@ fetch("/user_only/items/goodItemId", {
 
 ### How to verify a request contains a JWT token
 
-Use `eveauth.VerifyRequest(*http.Request) (*JWTPayload, err)` to verify your http request. This handler will (1) get the bearer token, (2) check if it is valid, (3) return error or return the data contains in the token
+Use `eveauth.VerifyRequest(*http.Request, *eveauth.AuthHandlerOptions) (*JWTPayload, err)` to verify your http request. 
+
+Verify a http.Request by (1) get bearer token, (2) verify if the token is a valid jwt token, (3) get userData then check if token is still active (4) then check if the user has the proper role if authOption != nil
 
 Here is an example:
 ```go
 func yourHandler(w http.ResponseWriter, r *http.Request) {
 
-    payload, err := eveauth.VerifyRequest(r)
+    payload, err := eveauth.VerifyRequest(r, &eveauth.AuthHandlerOptions{})
 
     if err != nil {
         // bearer token is not valid or expired
@@ -206,7 +220,7 @@ Error response:
 }
 ```
 
-Here is an example using fetch in JavaScript
+Here is a change password example using fetch in JavaScript
 ```js
 fetch("/user_only/items/goodItemId", {
     method: "POST",
@@ -224,12 +238,16 @@ fetch("/user_only/items/goodItemId", {
 })
 ```
 
+## 2. Changelog
 
-## 2. Feedback and Contribute
+- 25 Jun 2021: added roles
+- 24 Jun 2021: initiate project
+
+## 3. Feedback and Contribute
 
 Always welcome. Please [open a new thread](https://github.com/hieunc229/eveauth/issues/new)
 
-## 3. Licenses
+## 4. Licenses
 
 - eveauth MIT
 - BoltDB MIT
