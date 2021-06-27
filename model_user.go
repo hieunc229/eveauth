@@ -31,9 +31,10 @@ func getUserData(bucket *bolt.Bucket, username string) (userData, error) {
 
 	var err error
 	var userData userData
+	var db *bolt.DB
 
 	if bucket == nil {
-		db, err := getDB()
+		db, err = getDB()
 
 		if err != nil {
 			return userData, err
@@ -52,6 +53,10 @@ func getUserData(bucket *bolt.Bucket, username string) (userData, error) {
 
 	if userDataRawValue == nil {
 		return userData, errors.New("username doesn't exist")
+	}
+
+	if db != nil {
+		defer db.Close()
 	}
 
 	err = json.Unmarshal(userDataRawValue, &userData)
