@@ -2,6 +2,7 @@ package eveauth
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	email "net/mail"
 	"sort"
@@ -30,7 +31,7 @@ func VerifyRequest(r *http.Request, options *AuthHandlerOptions) (*JWTPayload, *
 	token := getToken(bearer)
 
 	// Request allow anonymous access
-	if options == nil || options.Role != "" || UserRoleLevels[options.Role] == UserRoleLevels[RoleAnonymous] {
+	if options == nil || options.Role == "" || UserRoleLevels[options.Role] == UserRoleLevels[RoleAnonymous] {
 		return nil, nil, token, nil
 	}
 
@@ -74,7 +75,7 @@ func validateUserInput(user *UserPayload) error {
 
 	var err error
 
-	errStr, err := validateUserNamePassword(user.Username, user.Password)
+	errStr, _ := validateUserNamePassword(user.Username, user.Password)
 
 	if _, err = email.ParseAddress(user.Email); err != nil {
 		errStr += "email, "
@@ -97,6 +98,7 @@ func validateUserNamePassword(username string, password string) (string, error) 
 	}
 
 	if password == "" || validatePassword(password) != nil {
+		fmt.Println(password)
 		errStr += "password, "
 	}
 
