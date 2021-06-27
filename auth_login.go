@@ -22,13 +22,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var payload loginPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		handleError(w, errors.New("can't load data"))
+		handleError(w, errors.New("can't decode login info"))
 		return
 	}
 
 	user := payload.Data
 
-	if _, err = validateUserNamePassword(user.Password, user.Username); err != nil {
+	if _, err = validateUserNamePassword(user.Username, user.Password); err != nil {
 		handleError(w, err)
 		return
 	}
@@ -41,7 +41,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := getDB()
 
 	if err != nil {
-		handleError(w, errors.New("can't load data"))
+		handleError(w, errors.New("database is unavailable"))
 		return
 	}
 
@@ -57,7 +57,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err = checkPasswordHash(userData.HashedPassword, user.Password); err != nil {
-			return err
+			return errors.New("invalid password")
 		}
 
 		if token, err = createJWTToken(user.Username); err != nil {
