@@ -1,10 +1,16 @@
 package eveauth
 
 import (
+	"errors"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
 func verifyToken(token string) (*JWTPayload, error) {
+
+	if token == "" {
+		return nil, errors.New("invalid token")
+	}
 
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)

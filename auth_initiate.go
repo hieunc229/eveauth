@@ -47,7 +47,7 @@ func InitiateAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return setUserData(bucket, user.Username, userData{
 			HashedPassword: password,
 			Email:          user.Email,
-			Role:           "admin",
+			Role:           RoleAdmin,
 		})
 	})
 
